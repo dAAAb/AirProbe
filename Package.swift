@@ -6,7 +6,8 @@ let package = Package(
     platforms: [.macOS(.v14)],
     products: [
         .library(name: "AirPoiseCore", targets: ["AirPoiseCore"]),
-        .executable(name: "AirPoise", targets: ["AirPoise"])
+        .executable(name: "AirPoise", targets: ["AirPoise"]),
+        .executable(name: "AirProbe", targets: ["AirProbe"])
     ],
     targets: [
         .target(
@@ -30,6 +31,19 @@ let package = Package(
                 .linkedFramework("SceneKit"),
                 .linkedFramework("Carbon"),
                 .linkedFramework("ApplicationServices")
+            ]
+        ),
+        .executableTarget(
+            name: "AirProbe",
+            dependencies: ["AirPoiseCore"],
+            path: "Sources/AirProbe",
+            linkerSettings: [
+                .linkedFramework("AppKit"),
+                .linkedFramework("SwiftUI"),
+                .linkedFramework("CoreMotion"),
+                .linkedFramework("SceneKit"),
+                .linkedFramework("Network"),
+                .linkedFramework("Charts")
             ]
         ),
         .testTarget(

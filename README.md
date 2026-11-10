@@ -1,20 +1,70 @@
-<p align="center">
-  <img src="Resources/Onboarding/comic-upright.png" width="220" alt="AirPoise mascot wearing AirPods">
-</p>
-
-<h1 align="center">AirPoise</h1>
+<h1 align="center">AirProbe</h1>
 
 <p align="center">
-  A tiny Mac menu-bar app. Wear AirPods, sit better, and run shortcuts with your head.
+  Use one AirPod as a live motion + sound sensor <b>inside an object</b> for robot experiments.<br>
+  把單支 AirPods 塞進物體裡，當成即時的六軸＋聲音感測器，拿來評估機器人 pick & place 做得好不好。
 </p>
 
 <p align="center">
-  <a href="https://github.com/jaskirat1616/AirPoise/releases/latest"><img src="https://img.shields.io/badge/download-DMG-black?style=flat-square" alt="Download"></a>
-  <a href="#what-you-need"><img src="https://img.shields.io/badge/macOS-14%2B-black?style=flat-square" alt="macOS 14+"></a>
+  <a href="https://github.com/dAAAb/AirProbe/releases/latest"><img src="https://img.shields.io/badge/download-DMG-black?style=flat-square" alt="Download"></a>
+  <img src="https://img.shields.io/badge/macOS-14%2B-black?style=flat-square" alt="macOS 14+">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-e31b23?style=flat-square" alt="MIT"></a>
 </p>
 
-**[Download AirPoise 1.0.0](https://github.com/jaskirat1616/AirPoise/releases/latest)** — open the DMG and drag the app onto Applications.
+<p align="center"><img src="docs/airprobe-screenshot.png" width="900" alt="AirProbe: a tablet tube in 3D, live tilt / accel / gyro / sound charts and a pick-and-place score"></p>
+
+**[Download AirProbe](https://github.com/dAAAb/AirProbe/releases/latest)**: a signed and notarized DMG. Open it and drag the app to Applications.
+
+AirProbe is built on [AirPoise](https://github.com/jaskirat1616/AirPoise) by Jaskirat Singh (MIT), a menu-bar
+posture app that reads the AirPods' head-tracking sensors. That app is still included here (see below).
+AirProbe reuses its motion layer and points it at objects instead of heads. AirProbe additions © 2026 dAAAb, also MIT.
+
+## 它能做什麼
+
+把一支 AirPods 放進罐子或管子裡（示範物件是 14.25 cm × Ø3.3 cm 的發泡錠管），App 會：
+
+- **3D 即時顯示物體姿態**：內附 Object Capture 掃描模型，也可以切換成參數化的簡易模型。
+- **判斷狀態**：直立、傾斜、躺平、倒立、移動中、自由落體（掉落）。
+- **自動評分 pick & place**：拿起、搬運、放下，靜止 0.6 秒後打分數。評分項目是最後有沒有站好、搬運中最大傾斜、放下衝擊、晃動程度、有沒有掉落。
+- **聲音感測**：用 AirPods 或 Mac 的麥克風量音量、偵測碰撞聲，跟 IMU 共用同一個時鐘，並能自動算出兩者的時間差。
+- **會說話**：站起來說「我站起來了！」，倒過來說「我顛倒了！」，側躺說「唉呀！我跌倒了！」，搖晃說「哇！好暈！」。可開「放大＋壓縮器」增強音量，平均響度約 +7 dB。
+- **錄音**：獨立的 WAV 錄音器，也可以跟 CSV 一起錄。
+- **輸出給機器人**：錄成 CSV（原始樣本）、JSONL（每次評分），或用 UDP JSON 即時串流，附 Python 接收範例 `scripts/probe_receiver.py`，可以接進 LeRobot 等流程。
+
+## 快速開始
+
+1. AirPods（Pro / 3 / 4 / 5 / Max）連上 Mac，設為聲音輸出。
+2. **關掉「自動耳朵偵測」**（系統設定 → 你的 AirPods），不然耳機離開耳朵就會停止送動作資料。
+3. 打開 AirProbe，允許「動作與健身」（要收音的話再允許麥克風）。
+4. 一支耳機放進物體（另一支留在充電盒），物體立正放好，按「歸零」。
+5. 拿起、搬動、放下，看評分。
+
+實測（AirPods Pro、macOS 27）：動作資料約 50 Hz，一次只會從一支耳機送資料。AirPods 麥克風開啟時藍牙會切到通話模式，輸入變成 24 kHz，動作資料仍持續，但切換時可能中斷幾秒。
+
+詳細說明、演算法與限制見 [docs/AirProbe.md](docs/AirProbe.md)。
+
+## 從原始碼建置
+
+```bash
+./scripts/build-probe.sh && open dist/AirProbe.app   # development build
+swift test --package-path .                          # unit tests
+python3 scripts/probe_receiver.py                    # receive the UDP stream
+# signed + notarized DMG (needs your own Developer ID and a notarytool profile)
+SIGN_IDENTITY="Developer ID Application: …" NOTARY_PROFILE=… ./scripts/release-probe.sh
+```
+
+| Path | What |
+|---|---|
+| `Sources/AirPoiseCore/Probe.swift` | Object-IMU analyzer: tilt from gravity, state, trial scoring (unit-tested) |
+| `Sources/AirProbe/` | AirProbe app: 3D scene, audio sensor, voice, recorder, UDP/CSV |
+| `Resources/Probe/huocuili.usdz` | Object Capture scan of the demo tube |
+| `docs/AirProbe.md` | Details and limits |
+
+---
+
+# AirPoise (upstream app, still included)
+
+The original menu-bar app is unchanged. Build it with `./scripts/build-app.sh`. Its documentation follows.
 
 AirPoise reads the motion sensors already inside AirPods (the same ones Spatial Audio uses). It does two jobs:
 

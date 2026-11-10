@@ -20,7 +20,8 @@ swift build -c release --product AirPoise
 
 - `Sources/AirPoiseCore` — math, pose, gesture engine, posture coach, settings store. No AppKit.
 - `Sources/AirPoise` — menu bar, overlays, action runner, SwiftUI settings.
-- `Tests/AirPoiseTests` — math / posture / gesture unit tests.
+- `Tests/AirPoiseTests` — math / posture / gesture / probe unit tests.
+- `Sources/AirProbe` + `AirPoiseCore/Probe.swift` — AirProbe.app: AirPod as an object-mounted IMU (活萃力 tube demo). Build: `./scripts/build-probe.sh`. See `docs/AirProbe.md`.
 
 ## Motion rules
 
